@@ -15,7 +15,7 @@ import javax.persistence.*;
 )
 //다음과 같이 어노테이션을 작성하면 Member 에 관해 조회할때 team 에 관한 내용도 같이 패치조인을 통해서 불러온다
 @NamedEntityGraph(name = "Member.all", attributeNodes = @NamedAttributeNode("team"))
-public class Member {
+public class Member extends BaseEntity {
 
     @Id
     @GeneratedValue

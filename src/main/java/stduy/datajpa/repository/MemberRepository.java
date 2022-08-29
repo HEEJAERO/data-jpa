@@ -2,7 +2,6 @@ package stduy.datajpa.repository;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.*;
 import org.springframework.data.repository.query.Param;
 import stduy.datajpa.dto.MemberDto;
@@ -14,7 +13,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
-public interface MemberRepository extends JpaRepository<Member, Long> {
+public interface MemberRepository extends JpaRepository<Member, Long>,MemberRepositoryCustom ,JpaSpecificationExecutor<Member>{
     public List<Member> findByUsernameAndAgeGreaterThan(String username, int age);
 
     @Query(name = "Member.findByUsername")
@@ -80,5 +79,20 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     List<Member> findLockByUsername(String name);
+
+    //List<UsernameOnlyDto> findProjectionsByUsername(@Param("username") String username);
+    // 위와같이 반환타입을 명확하게 명시해주어서 사용해도되고
+    <T>List<T> findProjectionsByUsername(@Param("username") String username,Class<T> Type);
+    // 쿼리문 자체는 똑같지만 리턴타입을 다양하게 활용하고 싶은 경우에는 리턴타입을 인자로 받고 제네릭을 이용하면
+    // 원하는 리턴타입으로 받을 수 있다.
+
+    @Query(value = "select * from member where username=?",nativeQuery = true)
+    Member findByNativeQuery(String username);
+
+    @Query(value = "select m.member_id as id, m.username, t.name as teamName" +
+            " from member m left join team t",
+            countQuery = "select count(*) from member",
+            nativeQuery = true)
+    Page<MemberProjection> findByNativeProjection(Pageable pageable);
 }
 
